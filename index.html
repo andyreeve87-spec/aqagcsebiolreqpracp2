@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AQA GCSE Required Practicals Paper 2</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        html, body { overflow-y: scroll !important; }
+        .icon-sm { font-size: 1rem; }
+        .icon-md { font-size: 1.25rem; }
+        .icon-lg { font-size: 1.5rem; }
+        .icon-xl { font-size: 2rem; }
+        
+        /* Bulletproof Print CSS for Individual Tabs */
+        @media screen {
+            .print-view-container { display: none !important; }
+        }
+        @media print {
+            body { background: white; margin: 0; padding: 0; color: black; }
+            .interactive-container, header, footer, .tab-navigation, .action-buttons { display: none !important; }
+            .print-view-container { display: block !important; }
+            main { padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
+            .print-break { page-break-inside: avoid; margin-bottom: 2rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; }
+            .print-page-break { page-break-before: always; }
+            .print-avoid-break { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- MULTILINGUAL UI DICTIONARY ---
+        const UI_TEXT = {
+            en: {
+                title: "AQA GCSE Required Practicals",
+                subtitle: "Paper 2 Practice",
+                createdBy: "Created by Mr A Reeve",
+                selectQ: "Select Practical",
+                typeHere: "Type or speak your answer here...",
+                dictCheck: "Check dictation for errors before time is up!",
+                startDict: "Start Dictation",
+                stopDict: "Stop Dictation",
+                hideMod: "Hide Models",
+                revealMod: "Reveal Models",
+                submitMsg: "Feedback will appear here automatically when the test ends.",
+                checkMsg: "Checking against mark scheme...",
+                autoFeed: "Automated Feedback",
+                didWell: "What you did well:",
+                toImprove: "To improve:",
+                printFeed: "Print Feedback for this Practical",
+                yourAns: "Your Answer:",
+                noAns: "[No answer provided]",
+                notMarked: "[Question not marked]",
+                lvl1: "Basic Level",
+                lvl2: "Good Level",
+                lvl3: "Excellent Level",
+                notSupported: "Speech-to-text not supported in this browser.",
+                readAloud: "Read question aloud",
+                stopReading: "Stop reading",
+                bookletBtn: "Model Answers Booklet",
+                backBtn: "Back to Practicals",
+                printBooklet: "Print Booklet",
+                modelAnsTitle: "Master Model Answers Booklet",
+                tapToFindOut: "Tap to find out about this practical (Aim & Methodology)",
+                startTest: "Start 15 Min Test",
+                timeUp: "Time's Up!",
+                lockedMsg: "Questions are Locked",
+                lockDesc: "You have 15 minutes to complete the questions for this practical.",
+                finishEarly: "Finish Early",
+                waiting: "Waiting to start..."
+            },
+            ro: {
+                title: "Practici Obligatorii GCSE AQA",
+                subtitle: "Practică Lucrarea 2",
+                createdBy: "Creat de Dl. A Reeve",
+                selectQ: "Selectați Practica",
+                typeHere: "Tastați sau rostiți răspunsul aici...",
+                dictCheck: "Verificați dictarea de erori înainte de expirarea timpului!",
+                startDict: "Începeți Dictarea",
+                stopDict: "Opriți Dictarea",
+                hideMod: "Ascunde Modele",
+                revealMod: "Afișează Modele",
+                submitMsg: "Feedback-ul va apărea aici automat la sfârșitul testului.",
+                checkMsg: "Se verifică pe baza baremului...",
+                autoFeed: "Feedback Automat",
+                didWell: "Ce ați făcut bine:",
+                toImprove: "Pentru a îmbunătăți:",
+                printFeed: "Imprimă Feedback pentru această practică",
+                yourAns: "Răspunsul tău:",
+                noAns: "[Niciun răspuns furnizat]",
+                notMarked: "[Întrebare neevaluată]",
+                lvl1: "Nivel de bază",
+                lvl2: "Nivel bun",
+                lvl3: "Nivel excelent",
+                notSupported: "Dictarea nu este suportată în acest browser.",
+                readAloud: "Citiți întrebarea",
+                stopReading: "Opriți citirea",
+                bookletBtn: "Broșură Răspunsuri Model",
+                backBtn: "Înapoi la Practici",
+                printBooklet: "Imprimă Broșura",
+                modelAnsTitle: "Broșură cu Răspunsuri Model",
+                tapToFindOut: "Atingeți pentru a afla despre această practică (Scop și Metodologie)",
+                startTest: "Începeți testul de 15 min",
+                timeUp: "Timpul a expirat!",
+                lockedMsg: "Întrebările sunt blocate",
+                lockDesc: "Aveți 15 minute pentru a finaliza întrebările pentru această practică.",
+                finishEarly: "Termină devreme",
+                waiting: "Așteptând să înceapă..."
+            },
+            pl: {
+                title: "Wymagane Praktyki AQA GCSE",
+                subtitle: "Praktyka Arkusz 2",
+                createdBy: "Stworzone przez Pana A Reeve",
+                selectQ: "Wybierz Praktykę",
+                typeHere: "Wpisz lub powiedz swoją odpowiedź tutaj...",
+                dictCheck: "Sprawdź dyktando pod kątem błędów przed upływem czasu!",
+                startDict: "Rozpocznij Dyktowanie",
+                stopDict: "Zatrzymaj Dyktowanie",
+                hideMod: "Ukryj Modele",
+                revealMod: "Pokaż Modele",
+                submitMsg: "Informacja zwrotna pojawi się tutaj automatycznie po zakończeniu testu.",
+                checkMsg: "Sprawdzanie na podstawie schematu punktowania...",
+                autoFeed: "Automatyczna Informacja Zwrotna",
+                didWell: "Co zrobiłeś dobrze:",
+                toImprove: "Do poprawy:",
+                printFeed: "Drukuj Informację dla tej praktyki",
+                yourAns: "Twoja Odpowiedź:",
+                noAns: "[Brak odpowiedzi]",
+                notMarked: "[Pytanie nieocenione]",
+                lvl1: "Poziom podstawowy",
+                lvl2: "Poziom dobry",
+                lvl3: "Poziom doskonały",
+                notSupported: "Dyktowanie nie jest obsługiwane w tej przeglądarce.",
+                readAloud: "Przeczytaj pytanie",
+                stopReading: "Zatrzymaj czytanie",
+                bookletBtn: "Broszura Odpowiedzi Wzorcowych",
+                backBtn: "Wróć do Praktyk",
+                printBooklet: "Drukuj Broszurę",
+                modelAnsTitle: "Broszura Wzorcowych Odpowiedzi",
+                tapToFindOut: "Dotknij, aby dowiedzieć się o tej praktyce (Cel i Metodologia)",
+                startTest: "Rozpocznij 15-minutowy test",
+                timeUp: "Czas minął!",
+                lockedMsg: "Pytania są zablokowane",
+                lockDesc: "Masz 15 minut na ukończenie pytań do tej praktyki.",
+                finishEarly: "Zakończ wcześniej",
+                waiting: "Oczekiwanie na start..."
+            },
+            uk: {
+                title: "Обов'язкові Практикуми AQA GCSE",
+                subtitle: "Практика Документ 2",
+                createdBy: "Створено містером А Рівом",
+                selectQ: "Виберіть Практикум",
+                typeHere: "Введіть або скажіть свою відповідь тут...",
+                dictCheck: "Перевірте диктування на помилки до закінчення часу!",
+                startDict: "Почати Диктування",
+                stopDict: "Зупинити Диктування",
+                hideMod: "Сховати Моделі",
+                revealMod: "Показати Моделі",
+                submitMsg: "Відгук з'явиться тут автоматично після завершення тесту.",
+                checkMsg: "Перевірка за схемою оцінювання...",
+                autoFeed: "Автоматичний Відгук",
+                didWell: "Що ви зробили добре:",
+                toImprove: "Що покращити:",
+                printFeed: "Друк Відгуку для цього практикуму",
+                yourAns: "Ваша Відповідь:",
+                noAns: "[Відповідь не надана]",
+                notMarked: "[Питання не оцінено]",
+                lvl1: "Базовий рівень",
+                lvl2: "Хороший рівень",
+                lvl3: "Відмінний рівень",
+                notSupported: "Диктування не підтримується у цьому браузері.",
+                readAloud: "Прочитати питання",
+                stopReading: "Зупинити читання",
+                bookletBtn: "Буклет Модельних Відповідей",
+                backBtn: "Назад до Практикумів",
+                printBooklet: "Друк Буклету",
+                modelAnsTitle: "Буклет Модельних Відповідей",
+                tapToFindOut: "Натисніть, щоб дізнатися про цей практикум (Мета та Методологія)",
+                startTest: "Почати 15-хвилинний тест",
+                timeUp: "Час вийшов!",
+                lockedMsg: "Питання заблоковані",
+                lockDesc: "У вас є 15 хвилин, щоб відповісти на питання цього практикуму.",
+                finishEarly: "Завершити достроково",
+                waiting: "Очікування початку..."
+            }
+        };
+
+        const DICT_LANGS = { en: 'en-GB', ro: 'ro-RO', pl: 'pl-PL', uk: 'uk-UA' };
+
+        // --- DATA: Practicals and Questions for Paper 2 ---
+        const PRACTICALS = [
+            {
+                id: 'p7',
+                title: { en: '7. Reaction Time', ro: '7. Timp de reacție', pl: '7. Czas reakcji', uk: '7. Час реакції' },
+                icon: 'ph-hand-pointing',
+                synopsis: {
+                    en: "Aim: To investigate whether practice, distractions, or a chemical (like caffeine) affects human reaction time. Methodology: Person A holds a ruler vertically with the zero mark level with Person B's thumb. Person A drops the ruler without warning, and Person B catches it as quickly as possible. The distance fallen is converted to a reaction time. The experiment is repeated to calculate a mean, and then repeated after introducing the independent variable.",
+                    ro: "Scop: Să investigheze dacă practica, distragerile sau o substanță chimică (cum ar fi cofeina) afectează timpul de reacție uman. Metodologie: Persoana A ține o riglă vertical cu marcajul zero la nivel cu degetul mare al Persoanei B. Persoana A scapă rigla fără avertisment, iar Persoana B o prinde cât mai repede posibil. Distanța căzută este convertită într-un timp de reacție. Experimentul este repetat pentru a calcula o medie și apoi repetat după introducerea variabilei independente.",
+                    pl: "Cel: Zbadanie, czy praktyka, czynniki rozpraszające lub substancja chemiczna (taka jak kofeina) wpływają na czas reakcji człowieka. Metodologia: Osoba A trzyma linijkę pionowo z oznaczeniem zero na równi z kciukiem Osoby B. Osoba A puszcza linijkę bez ostrzeżenia, a Osoba B łapie ją jak najszybciej. Zmierzona odległość jest przeliczana na czas reakcji. Eksperyment powtarza się w celu obliczenia średniej, a następnie powtarza po wprowadzeniu zmiennej niezależnej.",
+                    uk: "Мета: Дослідити, чи впливає практика, відволікаючі фактори або хімічна речовина (наприклад, кофеїн) на час реакції людини. Методологія: Особа А тримає лінійку вертикально так, щоб нульова позначка була на рівні великого пальця Особи Б. Особа А відпускає лінійку без попередження, і Особа Б ловить її якомога швидше. Пройдена відстань перетворюється на час реакції. Експеримент повторюють для обчислення середнього значення, а потім повторюють після введення незалежної змінної."
+                },
+                questions: [
+                    {
+                        id: 'p7q1',
+                        q: {
+                            en: "A student wants to investigate whether drinking a caffeinated sports drink decreases reaction time. Describe a suitable method using the ruler-drop test. Include how they should ensure their results are valid. (6 marks)",
+                            ro: "Un elev dorește să investigheze dacă consumul unei băuturi sportive cu cofeină scade timpul de reacție. Descrieți o metodă potrivită folosind testul căderii riglei. Includeți cum ar trebui să se asigure că rezultatele lor sunt valide. (6 puncte)",
+                            pl: "Uczeń chce zbadać, czy picie napoju sportowego z kofeiną skraca czas reakcji. Opisz odpowiednią metodę z użyciem testu łapania linijki. Uwzględnij, jak powinien upewnić się, że jego wyniki są miarodajne. (6 punktów)",
+                            uk: "Учень хоче дослідити, чи зменшує час реакції вживання спортивного напою з кофеїном. Опишіть відповідний метод з використанням тесту на падіння лінійки. Включіть, як вони повинні переконатися, що їхні результати є достовірними. (6 балів)"
+                        },
+                        maxMarks: 6,
+                        models: {
+                            level1: "Hold a ruler over their hand and drop it. Measure where they catch it. Give them caffeine, wait, and do it again. Keep it fair by using the same ruler.",
+                            level2: "Person A drops a ruler for Person B. Record the distance it falls. Do this 5 times to get an average. Give Person B a caffeine drink and wait 15 minutes. Drop the ruler 5 more times and compare the new average. Keep the drop height the same.",
+                            level3: "Person A sits with their dominant arm on a table. Person B holds a metre ruler vertically with the zero mark level with Person A's thumb. Person B drops the ruler without warning; Person A catches it as quickly as possible. Record the distance fallen and repeat 5 times to calculate a mean baseline. Person A consumes a set volume of caffeinated drink and waits 15 minutes. Repeat the test 5 times and calculate the new mean. To ensure validity, control variables like background noise, using the same hand, and dropping from the same height each time."
+                        },
+                        markFn: (t) => {
+                            let marks = 0, pts = [], imp = [];
+                            if (/(?=.*(zero))(?=.*(thumb|finger|level|mark))/i.test(t) || /(hold.*ruler)/i.test(t)) { marks++; pts.push("Described initial setup (zero mark level with thumb)."); } else { imp.push("Describe the setup: the 'zero' mark level with the 'thumb'."); }
+                            if (/(?=.*(drop|releas|let go))(?=.*(ruler))(?=.*(without warning|catch))/i.test(t)) { marks++; pts.push("Mentioned dropping the ruler and catching it."); } else { imp.push("Mention 'dropping the ruler' for the person to catch."); }
+                            if (/(?=.*(measure|record|read))(?=.*(distanc|cm|mark|where))/i.test(t)) { marks++; pts.push("Mentioned recording the distance fallen."); } else { imp.push("State you must 'record the distance' the ruler fell."); }
+                            if (/(?=.*(repeat|mean|average|5 times|again))/i.test(t) && /(?=.*(before|baseline|first))/i.test(t)) { marks++; pts.push("Mentioned repeating to calculate a baseline mean."); } else { imp.push("State that you must 'repeat' the test to calculate a 'mean' baseline before the drink."); }
+                            if (/(?=.*(caffein|drink|sport))(?=.*(wait|absorb|time|15 mins))/i.test(t) || /(?=.*(repeat|mean))(?=.*(after|new))/i.test(t)) { marks++; pts.push("Mentioned administering drink and repeating for a new mean."); } else { imp.push("Mention giving the 'drink', 'waiting', and 'repeating' for a new mean."); }
+                            if (/(?=.*(control|same|keep))(?=.*(noise|hand|arm|height|ruler))/i.test(t)) { marks++; pts.push("Identified a key control variable."); } else { imp.push("Mention a control variable (e.g., same 'height', 'hand', or background 'noise')."); }
+                            return { marks, positivePoints: pts, improvement: imp.join(" ") };
+                        }
+                    },
+                    {
+                        id: 'p7q2',
+                        q: {
+                            en: "In the baseline test, Person A recorded the following catch distances in centimetres: 15, 17, 42, 14, 16. Identify any anomalous results and calculate the valid mean catch distance. (3 marks)",
+                            ro: "În testul de bază, Persoana A a înregistrat următoarele distanțe de prindere în centimetri: 15, 17, 42, 14, 16. Identificați orice rezultate anormale și calculați distanța medie validă de prindere. (3 puncte)",
+                            pl: "W teście podstawowym Osoba A odnotowała następujące odległości łapania w centymetrach: 15, 17, 42, 14, 16. Zidentyfikuj wszelkie anomalne wyniki i oblicz prawidłową średnią odległość łapania. (3 punkty)",
+                            uk: "У базовому тесті Особа А зафіксувала такі відстані ловіння в сантиметрах: 15, 17, 42, 14, 16. Визначте будь-які аномальні результаты та обчисліть достовірну середню відстань ловіння. (3 бали)"
+                        },
+                        maxMarks: 3,
+                        models: {
+                            level1: "The anomaly is 42. The mean is 15.5.",
+                            level2: "42 cm is an anomaly so ignore it. Add the others: 15+17+14+16 = 62. 62 / 4 = 15.5 cm.",
+                            level3: "Identifies 42 cm as the anomalous result. Calculation excludes the anomaly: (15 + 17 + 14 + 16) / 4. Answer: 15.5 cm."
+                        },
+                        markFn: (t) => {
+                            let marks = 0, pts = [], imp = [];
+                            if (/(?=.*(42))(?=.*(anomal|wrong|ignor|exclud|outlier))/i.test(t) || /(42)/i.test(t)) { marks++; pts.push("Identified 42 as the anomaly."); } else { imp.push("Identify '42' as the anomaly."); }
+                            if (/(?=.*(15\s*\+\s*17\s*\+\s*14\s*\+\s*16))|(?=.*(62\s*\/\s*4))/i.test(t) || /(divid.*4)/i.test(t)) { marks++; pts.push("Showed correct calculation excluding anomaly."); } else { imp.push("Show the calculation excluding the anomaly (e.g., dividing by 4)."); }
+                            if (/(15\.5)/i.test(t)) { marks++; pts.push("Correct valid mean (15.5)."); } else { imp.push("State the final mean: '15.5' cm."); }
+                            return { marks, positivePoints: pts, improvement: imp.join(" ") };
+                        }
+                    },
+                    {
+                        id: 'p7q3',
+                        q: {
+                            en: "Some researchers use a computer program to measure reaction time. Evaluate the use of a computer program compared to the ruler-drop test. (4 marks)",
+                            ro: "Unii cercetători folosesc un program de calculator pentru a măsura timpul de reacție. Evaluați utilizarea unui program de calculator în comparație cu testul căderii riglei. (4 puncte)",
+                            pl: "Niektórzy badacze używają programu komputerowego do pomiaru czasu reakcji. Oceń wykorzystanie programu komputerowego w porównaniu z testem upuszczania linijki. (4 punkty)",
+                            uk: "Деякі дослідники використовують комп'ютерну програму для вимірювання часу реакції. Оцініть використання комп'ютерної програми порівняно з тестом на падіння лінійки. (4 бали)"
+                        },
+                        maxMarks: 4,
+                        models: {
+                            level1: "Computers are better because they don't make mistakes. Rulers are good because they are cheap.",
+                            level2: "Computers are more precise because they measure in milliseconds. They also stop the person from guessing when the ruler will drop. But the ruler test is cheaper and doesn't need special equipment.",
+                            level3: "Advantages of computer: It is more precise (measures to milliseconds). It removes human error from dropping/reading the ruler and prevents the catcher anticipating the drop from reading body language. Advantages of ruler-drop: It requires no specialist equipment, making it cheaper and easier to set up. Conclusion: A computer provides a more accurate resolution and removes anticipation bias, making data more valid."
+                        },
+                        markFn: (t) => {
+                            let marks = 0, pts = [], imp = [];
+                            if (/(?=.*(computer|program))(?=.*(precis|exact|millisecond|ms|accurat))/i.test(t)) { marks++; pts.push("Stated computers are more precise/accurate."); } else { imp.push("State that computers are more 'precise' (measure in 'milliseconds')."); }
+                            if (/(?=.*(human error|mistak|anticipat|guess|body language|predict))/i.test(t)) { marks++; pts.push("Stated computers remove human error/anticipation."); } else { imp.push("Explain computers remove 'human error' or prevent 'anticipation'."); }
+                            if (/(?=.*(ruler))(?=.*(cheap|eas|equip|classroom|accessibl))/i.test(t)) { marks++; pts.push("Stated ruler is cheaper/easier."); } else { imp.push("Give an advantage of the ruler (e.g., 'cheaper' or no special 'equipment')."); }
+                            if (/(?=.*(valid|resolut|bias|conclu))/i.test(t) || /(computer.*better)/i.test(t)) { marks++; pts.push("Provided a comparative conclusion."); } else { imp.push("Provide a conclusion on which is more 'valid'."); }
+                            return { marks, positivePoints: pts, improvement: imp.join(" ") };
+                        }
+                    },
+                    {
+                        id: 'p7q4',
+                        q: {
+                            en: "Practice can also reduce reaction time. Explain the biological reason why repeating the same action makes the reaction faster. (2 marks)",
+                            ro: "Practica poate reduce și timpul de reacție. Explicați motivul biologic pentru care repetarea aceleiași acțiuni face reacția mai rapidă. (2 puncte)",
+                            pl: "Praktyka może również skrócić czas reakcji. Wyjaśnij biologiczny powód, dla którego powtarzanie tej samej czynności przyspiesza reakcję. (2 punkty)",
+                            uk: "Практика також може зменшити час реакції. Поясніть біологічну причину, чому повторення однієї і тієї ж дії робить реакцію швидшою. (2 бали)"
+                        },
+                        maxMarks: 2,
+                        models: {
+                            level1: "Your brain gets used to it so it goes faster.",
+                            level2: "Repeated stimuli strengthen specific neural pathways. This makes the signal travel faster.",
+                            level3: "Repeated stimuli strengthen specific neural pathways. This can cause the response to become an automatic reflex, bypassing conscious processing in the brain / making synaptic transmission more efficient."
+                        },
+                        markFn: (t) => {
+                            let marks = 0, pts = [], imp = [];
+                            if (/(?=.*(strengthen|build|improve))(?=.*(pathway|neural|neurone|nerve|synaps))/i.test(t)) { marks++; pts.push("Mentioned strengthening neural pathways."); } else { imp.push("Explain that practice 'strengthens neural pathways' or synapses."); }
+                            if (/(?=.*(automatic|reflex|bypass|conscious|effici|brain))/i.test(t)) { marks++; pts.push("Explained it becomes an automatic reflex / efficient."); } else { imp.push("State it becomes an 'automatic reflex' or makes transmission more 'efficient'."); }
+                            return { marks, positivePoints: pts, improvement: imp.join(" ") };
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'p8',
+                title: { en: '8. Plant Responses (Triple)', ro: '8. Răspunsurile plantelor (Triple)', pl: '8. Reakcje roślin (Triple)', uk: '8. Реакції рослин (Triple)' },
+                icon: 'ph-plant',
+                synopsis: {
+                    en: "Aim: To investigate the effect of light or gravity on the growth of newly germinated seedlings. Methodology: Mustard or cress seeds are germinated in petri dishes with damp cotton wool. Once germinated, dishes are placed in different light conditions (e.g., full light, partial light from one side, complete darkness). The height of each seedling is measured daily for a week to observe phototropism.",
+                    ro: "Scop: Să investigheze efectul luminii sau gravitației asupra creșterii răsadurilor nou germinate. Metodologie: Semințele de muștar sau creson sunt germinate în cutii Petri cu vată umedă. Odată germinate, cutiile sunt plasate în diferite condiții de lumină (de exemplu, lumină completă, lumină parțială dintr-o parte, întuneric complet). Înălțimea fiecărui răsad este măsurată zilnic timp de o săptămână pentru a observa fototropismul.",
+                    pl: "Cel: Zbadanie wpływu światła lub grawitacji na wzrost nowo wykiełkowanych siewek. Metodologia: Nasiona gorczycy lub rzeżuchy kiełkują w szalkach Petriego na wilgotnej wacie. Po wykiełkowaniu szalki umieszcza się w różnych warunkach świetlnych (np. w pełnym świetle, częściowym świetle z jednej strony, w całkowitej ciemności). Wysokość każdej siewki jest mierzona codziennie przez tydzień, aby zaobserwować fototropizm.",
+                    uk: "Мета: Дослідити вплив світла або гравітації на ріст новопророслих саджанців. Методологія: Насіння гірчиці або крес-салату пророщують у чашках Петрі з вологою ватою. Після проростання чашки поміщають у різні умови освітлення (наприклад, повне освітлення, часткове освітлення з одного боку, повна темрява). Висоту кожного саджанця вимірюють щодня протягом тижня для спостереження за фототропізмом."
+                },
+                questions: [
+                    {
+                        id: 'p8q1',
+                        q: {
+                            en: "Describe a method to investigate the effect of unidirectional light (light from one side) on the growth of newly germinated cress seedlings. (6 marks)",
+                            ro: "Descrieți o metodă de investigare a efectului luminii unidirecționale (lumină dintr-o parte) asupra creșterii răsadurilor de creson nou germinate. (6 puncte)",
+                            pl: "Opisz metodę badania wpływu światła jednokierunkowego (światło z jednej strony) na wzrost nowo wykiełkowanych siewek rzeżuchy. (6 punktów)",
+                            uk: "Опишіть метод дослідження впливу односпрямованого світла (світло з одного боку) на ріст новопророслих саджанців крес-салату. (6 балів)"
+                        },
+                        maxMarks: 6,
+                        models: {
+                            level1: "Put seeds on wet cotton wool in dishes. Put one dish in a box with a hole in the side. Put another in the dark. Measure them after a few days with a ruler.",
+                            level2: "Place equal numbers of seeds in three petri dishes with damp cotton wool. Measure their starting height. Put Dish A in a box with a hole for light on one side. Put Dish B in full light and Dish C in a dark box. Leave for 3 days and measure the final height of the seedlings.",
+                            level3: "Place equal numbers of cress seeds into three different petri dishes lined with damp cotton wool. Allow the seeds to germinate in a warm, dark place. Measure the initial height of every seedling using a ruler. Place Dish A in a cardboard box with a hole cut in one side (unidirectional light). Place Dish B in a box with light shining directly from above (control). Place Dish C in a completely dark box (control). Leave for an equal amount of time. Measure the final height of each seedling and record the direction of growth. Calculate the mean height increase."
+                        },
+                        markFn: (t) => {
+                            let marks = 0, pts = [], imp = [];
+                            if (/(?=.*(seed|cress))(?=.*(dish|plate|cotton wool|water|damp))/i.test(t)) { marks++; pts.push("Described initial setup of seeds."); } else { imp.push("Mention placing seeds in a 'dish' with damp 'cotton wool'."); }
+                            if (/(?=.*(measur|record))(?=.*(height|length|start|initial))/i.test(t)) { marks++; pts.push("Mentioned measuring initial height."); } else { imp.push("State you must measure the 'initial height' of the seedlings."); }
+                            if (/(?=.*(hole|one side|slit|direction))(?=.*(box|light))/i.test(t)) { marks++; pts.push("Described setup for unidirectional light."); } else { imp.push("Describe putting a dish in a box with a 'hole on one side' for light."); }
+                            if (/(?=.*(control|dark|all round|above))/i.test(t)) { marks++; pts.push("Described control setups (dark or light from above)."); } else { imp.push("Mention a control setup, like a completely 'dark' box or light from 'above'."); }
+                            if (/(?=.*(time|day|week|leav))/i.test(t)) { marks++; pts.push("Mentioned leaving for a set time."); } else { imp.push("State leaving the seedlings for an equal amount of 'time'."); }
+                            if (/(?=.*(measur|record))(?=.*(final|end|height|direction|mean|averag))/i.test(t)) { marks++; pts.push("Mentioned measuring final height / direction / mean."); } else { imp.push("Mention measuring the 'final height' or recording the 'direction' of growth."); }
+                            return { marks, positivePoints: pts, improvement: imp.join(" ") };
+                        }
+                    },
+                    {
+                        id: 'p8q2',
+                        q: {
+                            en: "The mean initial length of the seedlings in Dish A was 25 mm. After 3 days, the mean final length was 34 mm. Calculate the percentage increase in length. Show your working. (3 marks)",
+                            ro: "Lungimea inițială medie a răsadurilor din vasul A a fost de 25 mm. După 3 zile, lungimea finală medie a fost de 34 mm. Calculați creșterea procentuală a lungimii. Arătați-vă calculul. (3 puncte)",
+                            pl: "Średnia początkowa długość siewek w naczyniu A wynosiła 25 mm. Po 3 dniach średnia końcowa długość wynosiła 34 mm. Oblicz procentowy wzrost długości. Pokaż swoje obliczenia. (3 punkty)",
+                            uk: "Середня початкова довжина саджанців у посудині А становила 25 мм. Через 3 дні середня кінцева довжина становила 34 мм. Обчисліть відсоткове збільшення довжини. Покажіть свої розрахунки. (3 бали)"
+                        },
+                        maxMarks: 3,
+                        models: {
+                            level1: "34 - 25 = 9. Then do percentage.",
+                            level2: "Change is 9mm. 9 / 25 x 100 = 36%.",
+                            level3: "Change in length: 34 - 25 = 9 mm. Calculation: (9 / 25) x 100. Answer: 36%"
+                        },
+                        markFn: (t) => {
+                            let marks = 0, pts = [], imp = [];
+                            if (/(?=.*(9|nine|34\s*-\s*25))/i.test(t)) { marks++; pts.push("Calculated change in length (9 mm)."); } else { imp.push("Calculate the change in length: 34 - 25 = '9' mm."); }
+                            if (/(?=.*(9\s*[\/\div]\s*25|9\s*div.*25|9.*over.*25|chang.*divid.*initial))/i.test(t) || /(?=.*100)/i.test(t)) { marks++; pts.push("Showed correct percentage calculation method."); } else { imp.push("Show the calculation: (9 / 25) x 100."); }
+                            if (/(?=.*(36))/i.test(t)) { marks++; pts.push("Correct answer (36%)."); } else { imp.push("State the final answer: '36%'."); }
+                            return { marks, positivePoints: pts, improvement: imp.join(" ") };
+                        }
+                    },
+                    {
+                        id: 'p8q3',
+                        q: {
+                            en: "The seedlings in Dish A bent towards the light. Explain the mechanism of phototropism that causes this directional growth. (4 marks)",
+                            ro: "Răsadurile din vasul A s-au îndoit spre lumină. Explicați mecanismul fototropismului care cauzează această creștere direcțională. (4 puncte)",
+                            pl: "Siewki w naczyniu A wygięły się w stronę światła. Wyjaśnij mechanizm fototropizmu, który powoduje ten ukierunkowany wzrost. (4 punkty)",
+                            uk: "Саджанці в посудині А зігнулися до світла. Поясніть механізм фототропізму, який викликає цей спрямований ріст. (4 бали)"
+                        },
+                        maxMarks: 4,
+                        models: {
+                            level1: "Auxin moves to the dark side and makes the plant grow faster there, so it bends.",
+                            level2: "Auxin is made in the tip. It moves to the shaded side of the shoot. This makes the cells on the shaded side elongate faster, causing the shoot to bend towards the light.",
+                            level3: "The hormone auxin is produced in the tip of the shoot. Due to unidirectional light, auxin redistributes and accumulates on the shaded side of the shoot. Auxin promotes cell elongation in the shoot. The cells on the shaded side grow longer/faster than the illuminated side, causing the shoot to bend towards the light."
+                        },
+                        markFn: (t) => {
+                            let marks = 0, pts = [], imp = [];
+                            if (/(?=.*(auxin|hormone))(?=.*(tip|shoot|top))/i.test(t)) { marks++; pts.push("Stated auxin is produced in the tip."); } else { imp.push("Name the hormone 'auxin' and state it is produced in the 'tip'."); }
+                            if (/(?=.*(shade|dark|away|redistribut|mov))/i.test(t)) { marks++; pts.push("Explained auxin moves to the shaded side."); } else { imp.push("Explain that auxin accumulates on the 'shaded side'."); }
+                            if (/(?=.*(elongat|grow|longer|faster))(?=.*(cell|shade|dark))/i.test(t)) { marks++; pts.push("Stated auxin promotes cell elongation."); } else { imp.push("State that auxin causes cells to 'elongate' or 'grow faster' on the shaded side."); }
+                            if (/(?=.*(bend|curv))(?=.*(light|towards))/i.test(t) || /(shoot to bend)/i.test(t)) { marks++; pts.push("Concluded uneven growth causes bending towards light."); } else { imp.push("Conclude that this uneven growth causes the shoot to 'bend towards the light'."); }
+                            return { marks, positivePoints: pts, improvement: imp.join(" ") };
+                        }
+                    },
+                    {
+                        id: 'p8q4',
+                        q: {
+                            en: "Give two variables that the student must control in this investigation to ensure a valid result. (2 marks)",
+                            ro: "Dați două variabile pe care elevul trebuie să le controleze în această investigație pentru a asigura un rezultat valid. (2 puncte)",
+                            pl: "Podaj dwie zmienne, które uczeń musi kontrolować w tym badaniu, aby zapewnić miarodajny wynik. (2 punkty)",
+                            uk: "Назвіть дві змінні, які учень повинен контролювати в цьому дослідженні, щоб забезпечити достовірний результат. (2 бали)"
+                        },
+                        maxMarks: 2,
+                        models: {
+                            level1: "The amount of water and the temperature.",
+                            level2: "Volume of water added to the cotton wool. Temperature of the room.",
+                            level3: "Volume of water added to the cotton wool. Temperature / number of seeds per dish / species of seed."
+                        },
+                        markFn: (t) => {
+                            let marks = 0, pts = [], imp = [];
+                            if (/(?=.*(water|liquid|damp|moistur))/i.test(t)) { marks++; pts.push("Identified volume of water as a control."); } else { imp.push("Mention controlling the 'volume of water'."); }
+                            if (/(?=.*(temperatur|heat|seed|number|amount|species|type|cress))/i.test(t)) { marks++; pts.push("Identified temperature or seed type/number as a control."); } else { imp.push("Mention controlling the 'temperature' or the 'number/type of seeds'."); }
+                            return { marks, positivePoints: pts, improvement: imp.join(" ") };
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'p9',
+                title: { en: '9. Field Investigations', ro: '9. Investigații de teren', pl: '9. Badania terenowe', uk: '9. Польові дослідження' },
+                icon: 'ph-leaf',
+                synopsis: {
+                    en: "Aim: To measure the population size of a common plant species in a habitat and investigate the effect of a factor on plant distribution. Methodology: You will use a quadrat placed randomly to estimate the total population of a plant in a field. You will also use a transect line to measure how the distribution of a plant species changes along an environmental gradient (e.g., from a tree to open field).",
+                    ro: "Scop: Măsurarea dimensiunii populației unei specii comune de plante într-un habitat și investigarea efectului unui factor asupra distribuției plantelor. Metodologie: Veți folosi un quadrat plasat la întâmplare pentru a estima populația totală a unei plante într-un câmp. De asemenea, veți folosi o linie de transect pentru a măsura modul în care distribuția unei specii de plante se modifică de-a lungul unui gradient de mediu (de exemplu, de la un copac la câmp deschis).",
+                    pl: "Cel: Zmierzenie wielkości populacji pospolitego gatunku rośliny w siedlisku i zbadanie wpływu czynnika na rozmieszczenie roślin. Metodologia: Użyjesz kwadratu umieszczonego losowo, aby oszacować całkowitą populację rośliny na polu. Użyjesz również linii transektu, aby zmierzyć, jak zmienia się rozmieszczenie gatunku rośliny wzdłuż gradientu środowiskowego (np. od drzewa do otwartego pola).",
+                    uk: "Мета: Виміряти чисельність популяції поширеного виду рослин у середовищі існування та дослідити вплив певного фактора на розподіл рослин. Методологія: Ви будете використовувати квадрат, розміщений випадковим чином, щоб оцінити загальну популяцію рослини в полі. Ви також будете використовувати лінію трансекту, щоб виміряти, як розподіл виду рослин змінюється вздовж екологічного градієнта (наприклад, від дерева до відкритого поля)."
+                },
+                questions: [
+                    {
+                        id: 'p9q1',
+                        q: {
+                            en: "A student wants to estimate the total population of dandelion plants in a large rectangular field. Describe how they could do this accurately using a quadrat. (6 marks)",
+                            ro: "Un elev dorește să estimeze populația totală de plante de păpădie într-un câmp dreptunghiular mare. Descrieți cum ar putea face acest lucru cu precizie folosind un quadrat. (6 puncte)",
+                            pl: "Uczeń chce oszacować całkowitą populację mniszka lekarskiego na dużym prostokątnym polu. Opisz, w jaki sposób mógłby to zrobić dokładnie za pomocą kwadratu. (6 punktów)",
+                            uk: "Учень хоче оцінити загальну популяцію кульбаби на великому прямокутному полі. Опишіть, як він міг би зробити це точно за допомогою квадрата. (6 балів)"
+                        },
+                        maxMarks: 6,
+                        models: {
+                            level1: "Throw a quadrat on the ground and count the dandelions. Do this lots of times. Multiply the average by the size of the field.",
+                            level2: "Set up a grid using tape measures. Use a random number generator to find coordinates. Place the quadrat there and count the dandelions. Repeat 10 times and find the mean. Multiply the mean by the area of the whole field.",
+                            level3: "Use a tape measure to set up two perpendicular axes (a grid) across the field. Use a random number generator to generate coordinates. Place a 0.5m x 0.5m quadrat at the randomly generated coordinates. Count the number of dandelion plants inside the quadrat. Repeat this process a large number of times (e.g., 10 or more) to ensure a representative sample. Calculate the mean number of dandelions per quadrat. Calculate the total area of the field. Divide the total field area by the area of one quadrat, then multiply by the mean number of dandelions to estimate the total population."
+                        },
+                        markFn: (t) => {
+                            let marks = 0, pts = [], imp = [];
+                            if (/(?=.*(tape|grid|axes|measure))/i.test(t)) { marks++; pts.push("Mentioned setting up a grid/axes."); } else { imp.push("Mention setting up a 'grid' using tape measures."); }
+                            if (/(?=.*(random|generator|calculator|blind|throw))/i.test(t)) { marks++; pts.push("Mentioned random sampling."); } else { imp.push("Explain using a 'random' method (e.g., random number generator)."); }
+                            if (/(?=.*(place|put|lay))(?=.*(quadrat|square))/i.test(t)) { marks++; pts.push("Mentioned placing the quadrat."); } else { imp.push("Mention placing the 'quadrat' down."); }
+                            if (/(?=.*(count|number|record))(?=.*(plant|dandelion))/i.test(t)) { marks++; pts.push("Mentioned counting the plants inside."); } else { imp.push("State you must 'count' the dandelions inside."); }
+                            if (/(?=.*(repeat|10 times|again|mean|averag))/i.test(t)) { marks++; pts.push("Mentioned repeating to find a mean."); } else { imp.push("Mention 'repeating' multiple times to find a 'mean'."); }
+                            if (/(?=.*(multiply|area|total|scale|calculat))(?=.*(field))/i.test(t)) { marks++; pts.push("Described scaling up to the total field area."); } else { imp.push("Explain multiplying the mean by the total 'area of the field'."); }
+                            return { marks, positivePoints: pts, improvement: imp.join(" ") };
+                        }
+                    },
+                    {
+                        id: 'p9q2',
+                        q: {
+                            en: "The field measures 100 m by 50 m. The student uses a quadrat that is 0.5 m by 0.5 m. The student calculates a mean of 3.2 dandelions per quadrat. Calculate the estimated total population of dandelions in the field. (4 marks)",
+                            ro: "Câmpul măsoară 100 m pe 50 m. Elevul folosește un quadrat de 0,5 m pe 0,5 m. Elevul calculează o medie de 3,2 păpădii pe quadrat. Calculați populația totală estimată de păpădii din câmp. (4 puncte)",
+                            pl: "Pole ma wymiary 100 m na 50 m. Uczeń używa kwadratu o wymiarach 0,5 m na 0,5 m. Uczeń oblicza średnią 3,2 mniszka lekarskiego na kwadrat. Oblicz szacowaną całkowitą populację mniszka lekarskiego na polu. (4 punkty)",
+                            uk: "Поле має розміри 100 м на 50 м. Учень використовує квадрат розміром 0,5 м на 0,5 м. Учень обчислює в середньому 3,2 кульбаби на квадрат. Обчисліть орієнтовну загальну популяцію кульбаб на полі. (4 бали)"
+                        },
+                        maxMarks: 4,
+                        models: {
+                            level1: "Field area is 5000. Quadrat area is 0.25. Multiply the mean.",
+                            level2: "Field area = 100 x 50 = 5000. Quadrat area = 0.5 x 0.5 = 0.25. 5000 / 0.25 = 20000 quadrats in the field. 20000 x 3.2 = 64000.",
+                            level3: "Calculate total field area: 100 x 50 = 5000 m². Calculate quadrat area: 0.5 x 0.5 = 0.25 m². Calculate number of quadrats that fit in the field: 5000 / 0.25 = 20,000. Calculate total population: 20,000 x 3.2 = 64,000. (Alternative method: 3.2 / 0.25 = 12.8 dandelions per m². 12.8 x 5000 = 64,000.)"
+                        },
+                        markFn: (t) => {
+                            let marks = 0, pts = [], imp = [];
+                            if (/(?=.*(5000|100\s*\*\s*50))/i.test(t)) { marks++; pts.push("Calculated field area (5000)."); } else { imp.push("Calculate the field area: 100 x 50 = '5000'."); }
+                            if (/(?=.*(0\.25|0\.5\s*\*\s*0\.5))/i.test(t)) { marks++; pts.push("Calculated quadrat area (0.25)."); } else { imp.push("Calculate the quadrat area: 0.5 x 0.5 = '0.25'."); }
+                            if (/(?=.*(20000|12\.8|5000\s*[\/\div]\s*0\.25|3\.2\s*[\/\div]\s*0\.25))/i.test(t)) { marks++; pts.push("Showed correct scaling step."); } else { imp.push("Show scaling: 5000 / 0.25 = '20000' (or 3.2 / 0.25 = '12.8')."); }
+                            if (/(?=.*(64000|64,000))/i.test(t)) { marks++; pts.push("Correct final answer (64,000)."); } else { imp.push("State the final estimated population: '64,000'."); }
+                            return { marks, positivePoints: pts, improvement: imp.join(" ") };
+                        }
+                    },
+                    {
+                        id: 'p9q3',
+                        q: {
+                            en: "The student notices fewer dandelions under a large oak tree compared to the open field. Name and describe the sampling technique the student should use to investigate how the dandelion population changes as distance from the tree increases. (3 marks)",
+                            ro: "Elevul observă mai puține păpădii sub un stejar mare în comparație cu câmpul deschis. Numiți și descrieți tehnica de eșantionare pe care ar trebui să o folosească elevul pentru a investiga cum se modifică populația de păpădie pe măsură ce distanța față de copac crește. (3 puncte)",
+                            pl: "Uczeń zauważa, że pod dużym dębem jest mniej mniszków lekarskich niż na otwartym polu. Nazwij i opisz technikę pobierania próbek, której uczeń powinien użyć do zbadania, jak zmienia się populacja mniszka lekarskiego wraz ze wzrostem odległości od drzewa. (3 punkty)",
+                            uk: "Учень помічає менше кульбаб під великим дубом порівняно з відкритим полем. Назвіть і опишіть метод відбору проб, який учень повинен використовувати для дослідження зміни популяції кульбаби зі збільшенням відстані від дерева. (3 бали)"
+                        },
+                        maxMarks: 3,
+                        models: {
+                            level1: "Use a line transect. Put a tape measure down and count plants next to it.",
+                            level2: "Use systematic sampling with a transect. Lay a tape measure from the tree outwards. Place a quadrat every 2 metres and count the dandelions.",
+                            level3: "Name: Systematic sampling / Transect line. Description: Lay a tape measure (transect) in a straight line from the base of the tree outwards into the open field. Place the quadrat at regular intervals (e.g., every 2 metres) along the tape measure and count the dandelions."
+                        },
+                        markFn: (t) => {
+                            let marks = 0, pts = [], imp = [];
+                            if (/(?=.*(transect|systematic))/i.test(t)) { marks++; pts.push("Named the technique (Transect / Systematic sampling)."); } else { imp.push("Name the technique: 'Transect' or 'systematic sampling'."); }
+                            if (/(?=.*(tape|measur|line))(?=.*(tree|outward|straight|from|base))/i.test(t)) { marks++; pts.push("Described laying a line from the tree."); } else { imp.push("Describe laying a 'tape measure' in a line from the 'tree'."); }
+                            if (/(?=.*(quadrat))(?=.*(interval|every|regular|distanc|along|down|meter|m))/i.test(t)) { marks++; pts.push("Described placing quadrats at intervals."); } else { imp.push("Explain placing a 'quadrat' at regular 'intervals' along the line."); }
+                            return { marks, positivePoints: pts, improvement: imp.join(" ") };
+                        }
+                    },
+                    {
+                        id: 'p9q4',
+                        q: {
+                            en: "Explain why it is essential to use a random number generator for the coordinates in Q1 rather than the student choosing where to place the quadrat. (2 marks)",
+                            ro: "Explicați de ce este esențial să utilizați un generator de numere aleatoare pentru coordonatele din Q1, mai degrabă decât ca elevul să aleagă unde să plaseze quadratul. (2 puncte)",
+                            pl: "Wyjaśnij, dlaczego do określenia współrzędnych w pytaniu 1 niezbędne jest użycie generatora liczb losowych, a nie samodzielne wybieranie przez ucznia miejsca umieszczenia kwadratu. (2 punkty)",
+                            uk: "Поясніть, чому для отримання координат у питанні 1 обов'язково використовувати генератор випадкових чисел, а не дозволяти учневі самостійно вибирати, де розмістити квадрат. (2 бали)"
+                        },
+                        maxMarks: 2,
+                        models: {
+                            level1: "So it is fair and they don't just pick places with lots of flowers.",
+                            level2: "To avoid bias, because the student might subconsciously choose areas with lots of flowers. This ensures the sample is representative.",
+                            level3: "To avoid bias (e.g., the student might subconsciously choose areas with lots of flowers). To ensure the sample is truly representative of the whole field, making the population estimate valid."
+                        },
+                        markFn: (t) => {
+                            let marks = 0, pts = [], imp = [];
+                            if (/(?=.*(bias|fair|pick|choos|subconscious|subjectiv))/i.test(t)) { marks++; pts.push("Mentioned avoiding bias."); } else { imp.push("Explain that it avoids 'bias' (picking specific spots)."); }
+                            if (/(?=.*(represent|valid|accurat|whole|entire))/i.test(t)) { marks++; pts.push("Mentioned making it representative/valid."); } else { imp.push("State that it ensures the sample is 'representative' or makes the estimate 'valid'."); }
+                            return { marks, positivePoints: pts, improvement: imp.join(" ") };
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'p10',
+                title: { en: '10. Decay (Triple)', ro: '10. Descompunere (Triple)', pl: '10. Rozkład (Triple)', uk: '10. Розпад (Triple)' },
+                icon: 'ph-thermometer',
+                synopsis: {
+                    en: "Aim: To investigate the effect of temperature on the rate of decay of fresh milk by measuring pH change. Methodology: You will use lipase enzyme to break down the lipids in milk into fatty acids, which lowers the pH. You will use phenolphthalein indicator (which is pink in alkaline conditions and colourless in acidic conditions) and time how long it takes for the pink colour to disappear at different temperatures.",
+                    ro: "Scop: Investigarea efectului temperaturii asupra ratei de descompunere a laptelui proaspăt prin măsurarea modificării pH-ului. Metodologie: Veți folosi enzima lipază pentru a descompune lipidele din lapte în acizi grași, ceea ce scade pH-ul. Veți folosi indicatorul fenolftaleină (care este roz în condiții alcaline și incolor în condiții acide) și veți cronometra cât timp durează până când culoarea roz dispare la diferite temperaturi.",
+                    pl: "Cel: Zbadanie wpływu temperatury na szybkość rozkładu świeżego mleka poprzez pomiar zmiany pH. Metodologia: Użyjesz enzymu lipazy do rozkładu lipidów w mleku na kwasy tłuszczowe, co obniża pH. Użyjesz wskaźnika fenoloftaleiny (który jest różowy w warunkach zasadowych i bezbarwny w warunkach kwasowych) i zmierzysz, ile czasu potrzeba na zniknięcie różowego koloru w różnych temperaturach.",
+                    uk: "Мета: Дослідити вплив температури на швидкість розпаду свіжого молока шляхом вимірювання зміни рН. Методологія: Ви будете використовувати фермент ліпазу для розщеплення ліпідів у молоці на жирні кислоти, що знижує рН. Ви будете використовувати індикатор фенолфталеїн (який має рожевий колір у лужних умовах і безбарвний у кислих) і засікатимете час, за який рожевий колір зникає за різних температур."
+                },
+                questions: [
+                    {
+                        id: 'p10q1',
+                        q: {
+                            en: "A student investigates the effect of temperature on the rate of decay of fresh milk. They use the enzyme lipase, sodium carbonate solution, and phenolphthalein indicator. Describe how they should carry out this investigation. (6 marks)",
+                            ro: "Un elev investighează efectul temperaturii asupra ratei de descompunere a laptelui proaspăt. Ei folosesc enzima lipază, soluție de carbonat de sodiu și indicator fenolftaleină. Descrieți cum ar trebui să efectueze această investigație. (6 puncte)",
+                            pl: "Uczeń bada wpływ temperatury na szybkość rozkładu świeżego mleka. Używa enzymu lipazy, roztworu węglanu sodu i wskaźnika fenoloftaleiny. Opisz, w jaki sposób powinien przeprowadzić to badanie. (6 punktów)",
+                            uk: "Учень досліджує вплив температури на швидкість розпаду свіжого молока. Він використовує фермент ліпазу, розчин карбонату натрію та індикатор фенолфталеїн. Опишіть, як він повинен проводити це дослідження. (6 балів)"
+                        },
+                        maxMarks: 6,
+                        models: {
+                            level1: "Mix milk, sodium carbonate, and indicator so it turns pink. Put it in a warm water bath. Add lipase and start a stopwatch. Stop when it turns white. Repeat at different temperatures.",
+                            level2: "Label tubes for lipase and milk. Add milk, sodium carbonate, and phenolphthalein to one tube (it turns pink). Place both tubes in a water bath at 20°C and leave to adjust. Transfer the lipase to the milk tube, stir, and start a stopwatch. Stop when the pink colour goes. Repeat at 30°C and 40°C.",
+                            level3: "Label a tube 'lipase' and add 5cm³ of lipase. Label another 'milk' and add 5cm³ milk, 7cm³ sodium carbonate, and 5 drops phenolphthalein (it turns pink/alkaline). Place both tubes in a water bath at 20°C. Leave for 5 minutes so they reach the exact temperature. Use a pipette to transfer 1cm³ of lipase into the 'milk' tube and start a stopwatch immediately. Stir the mixture. Stop the stopwatch when the solution loses its pink colour (becomes colourless/white). Record the time and repeat at different temperatures (e.g., 30°C, 40°C, 50°C)."
+                        },
+                        markFn: (t) => {
+                            let marks = 0, pts = [], imp = [];
+                            if (/(?=.*(mix|combin|add))(?=.*(milk))(?=.*(carbonate))(?=.*(indicator|phenolphthalein))/i.test(t)) { marks++; pts.push("Mentioned mixing milk, carbonate, and indicator."); } else { imp.push("Mention mixing 'milk', sodium 'carbonate', and the 'indicator'."); }
+                            if (/(?=.*(pink|alkalin))/i.test(t)) { marks++; pts.push("Noted the starting colour is pink."); } else { imp.push("State that the starting solution turns 'pink'."); }
+                            if (/(?=.*(temp|water bath|thermometer|control))/i.test(t)) { marks++; pts.push("Mentioned using a water bath for temperature control."); } else { imp.push("Mention using a 'water bath' to control temperature."); }
+                            if (/(?=.*(leav|wait|adjust|equilibrat|reach))(?=.*(temperatur|heat|bath|minut))/i.test(t)) { marks++; pts.push("Mentioned leaving tubes to equilibrate to temperature."); } else { imp.push("Explain leaving the tubes to 'reach the temperature' before mixing."); }
+                            if (/(?=.*(add|transfer|mix))(?=.*(lipase|enzym))(?=.*(stopwatch|timer|time|clock))/i.test(t)) { marks++; pts.push("Described adding lipase and starting a timer."); } else { imp.push("Describe adding 'lipase' and starting a 'stopwatch'."); }
+                            if (/(?=.*(stop|record|end))(?=.*(colourless|white|lose|disappear|gone|no colour))/i.test(t)) { marks++; pts.push("Identified the end point (loses pink colour)."); } else { imp.push("State stopping the timer when it becomes 'colourless' or 'white' (loses pink colour)."); }
+                            return { marks, positivePoints: pts, improvement: imp.join(" ") };
+                        }
+                    },
+                    {
+                        id: 'p10q2',
+                        q: {
+                            en: "Instead of using an indicator, a student uses a pH probe to continuously measure the pH of the milk as it decays at 30°C. They plot a graph of pH (y-axis) against time in minutes (x-axis), which forms a curve. Describe how the student can use this graph to determine the rate of decay at exactly 5 minutes. (3 marks)",
+                            ro: "În loc să folosească un indicator, un elev folosește o sondă de pH pentru a măsura continuu pH-ul laptelui în timp ce se descompune la 30°C. El trasează un grafic al pH-ului (axa y) în funcție de timpul în minute (axa x), care formează o curbă. Descrieți cum poate elevul să folosească acest grafic pentru a determina rata de descompunere la exact 5 minute. (3 puncte)",
+                            pl: "Zamiast używać wskaźnika, uczeń używa sondy pH do ciągłego pomiaru pH mleka podczas jego rozkładu w temperaturze 30°C. Sporządza wykres zależności pH (oś y) od czasu w minutach (oś x), który tworzy krzywą. Opisz, w jaki sposób uczeń może wykorzystać ten wykres do określenia szybkości rozkładu w dokładnie 5 minucie. (3 punkty)",
+                            uk: "Замість індикатора учень використовує рН-зонд для безперервного вимірювання рН молока під час його розпаду при 30°C. Він будує графік залежності рН (вісь y) від часу у хвилинах (вісь x), який утворює криву. Опишіть, як учень може використати цей графік для визначення швидкості розпаду рівно на 5-й хвилині. (3 бали)"
+                        },
+                        maxMarks: 3,
+                        models: {
+                            level1: "Draw a line with a ruler at 5 minutes and calculate the rate.",
+                            level2: "Draw a straight line called a tangent touching the curve at 5 minutes. Find the gradient of that line.",
+                            level3: "Draw a tangent to the curve at the 5-minute mark on the x-axis. Calculate the gradient of that tangent line by dividing the change in y (pH) by the change in x (time)."
+                        },
+                        markFn: (t) => {
+                            let marks = 0, pts = [], imp = [];
+                            if (/(?=.*(tangent|straight line|touching))/i.test(t)) { marks++; pts.push("Mentioned drawing a tangent."); } else { imp.push("State you must draw a 'tangent' to the curve."); }
+                            if (/(?=.*(5|five))(?=.*(minut|mark|point|axis))/i.test(t)) { marks++; pts.push("Mentioned drawing it at 5 minutes."); } else { imp.push("Mention drawing it at the '5 minute' point."); }
+                            if (/(?=.*(gradient|slope|steepness|y \/ x|change in y))/i.test(t)) { marks++; pts.push("Mentioned calculating the gradient/slope."); } else { imp.push("Explain you must calculate the 'gradient' (or slope) of the tangent."); }
+                            return { marks, positivePoints: pts, improvement: imp.join(" ") };
+                        }
+                    },
+                    {
+                        id: 'p10q3',
+                        q: {
+                            en: "A different student plotted a graph showing Temperature on the x-axis and overall Rate of Decay on the y-axis. The rate of decay increases up to 45°C, but drops rapidly to zero at 60°C. Explain the shape of this graph biologically. (4 marks)",
+                            ro: "Un alt elev a trasat un grafic care arată Temperatura pe axa x și Rata generală de descompunere pe axa y. Rata de descompunere crește până la 45°C, dar scade rapid la zero la 60°C. Explicați forma acestui grafic din punct de vedere biologic. (4 puncte)",
+                            pl: "Inny uczeń sporządził wykres przedstawiający temperaturę na osi x i całkowitą szybkość rozkładu na osi y. Szybkość rozkładu wzrasta do 45°C, ale gwałtownie spada do zera przy 60°C. Wyjaśnij kształt tego wykresu pod względem biologicznym. (4 punkty)",
+                            uk: "Інший учень побудував графік, що показує температуру на осі x і загальну швидкість розпаду на осі y. Швидкість розпаду зростає до 45°C, але швидко падає до нуля при 60°C. Поясніть форму цього графіка з біологічної точки зору. (4 бали)"
+                        },
+                        maxMarks: 4,
+                        models: {
+                            level1: "It goes up because it's warmer. Then at 60 it gets too hot and the enzyme dies.",
+                            level2: "As temperature increases, enzymes have more energy so they react faster. 45°C is the optimum. At 60°C it is too hot, so the enzyme denatures and changes shape, stopping the decay.",
+                            level3: "As temperature increases up to 45°C, kinetic energy increases, leading to more frequent successful collisions between the lipase enzyme and lipid molecules. 45°C is the optimum temperature where the rate is highest. At 60°C, the high temperature breaks the bonds holding the enzyme together. The active site of the lipase enzyme changes shape (it denatures), so the substrate can no longer bind, stopping decay."
+                        },
+                        markFn: (t) => {
+                            let marks = 0, pts = [], imp = [];
+                            if (/(?=.*(kinetic|energy|collide|collision|fast|frequent))/i.test(t)) { marks++; pts.push("Explained rate increase due to kinetic energy/collisions."); } else { imp.push("Explain that up to 45°C, more 'kinetic energy' leads to more 'collisions'."); }
+                            if (/(?=.*(optimum|best|peak|highest))/i.test(t)) { marks++; pts.push("Identified 45°C as the optimum temperature."); } else { imp.push("Identify 45°C as the 'optimum' temperature."); }
+                            if (/(?=.*(denatur|destroy|bond|break))/i.test(t)) { marks++; pts.push("Stated the enzyme denatures at 60°C."); } else { imp.push("State that at 60°C the enzyme 'denatures' (do not say it 'dies')."); }
+                            if (/(?=.*(active site|shape|fit|bind|substrate))/i.test(t)) { marks++; pts.push("Explained active site changes shape."); } else { imp.push("Explain that the 'active site' changes 'shape' so the substrate cannot bind."); }
+                            return { marks, positivePoints: pts, improvement: imp.join(" ") };
+                        }
+                    },
+                    {
+                        id: 'p10q4',
+                        q: {
+                            en: "A common source of error in the original indicator method is determining the exact moment the solution becomes colourless. Suggest one way the student could modify the method to make identifying the endpoint more accurate and repeatable. (2 marks)",
+                            ro: "O sursă comună de eroare în metoda originală cu indicator este determinarea momentului exact în care soluția devine incoloră. Sugerați o modalitate prin care elevul ar putea modifica metoda pentru a face identificarea punctului final mai precisă și mai repetabilă. (2 puncte)",
+                            pl: "Częstym źródłem błędu w oryginalnej metodzie wskaźnikowej jest określenie dokładnego momentu, w którym roztwór staje się bezbarwny. Zaproponuj jeden sposób, w jaki uczeń mógłby zmodyfikować tę metodę, aby identyfikacja punktu końcowego była dokładniejsza i bardziej powtarzalna. (2 punkty)",
+                            uk: "Поширеним джерелом помилки в оригінальному індикаторному методі є визначення точного моменту, коли розчин стає безбарвним. Запропонуйте один спосіб, за допомогою якого учень міг би змінити метод, щоб зробити визначення кінцевої точки більш точним і повторюваним. (2 бали)"
+                        },
+                        maxMarks: 2,
+                        models: {
+                            level1: "Use a machine to look at the colour instead of their eyes.",
+                            level2: "Use a colorimeter to measure the colour change exactly. Or use a reference tube to compare it to.",
+                            level3: "Use a colorimeter to measure light transmission quantitatively. Or, use a reference tube (a tube containing milk and lipase but no indicator) to compare the colour against."
+                        },
+                        markFn: (t) => {
+                            let marks = 0, pts = [], imp = [];
+                            if (/(?=.*(colorimeter|colourimeter|light sensor|transmission|machine|device))/i.test(t)) { marks++; pts.push("Suggested a colorimeter/device."); } else { imp.push("Suggest using a 'colorimeter' (or light sensor)."); }
+                            if (/(?=.*(reference|control|compare|standard|tube|sample))/i.test(t)) { marks++; pts.push("Suggested a reference/control tube for comparison."); } else { imp.push("Or suggest using a 'reference tube' to 'compare' the colour against."); }
+                            return { marks, positivePoints: pts, improvement: imp.join(" ") };
+                        }
+                    }
+                ]
+            }
+        ];
+
+        // --- COMPONENT: Dictation / Speech to Text ---
+        function DictationButton({ onDictation, lang, ui, disabled }) {
+            const [isListening, setIsListening] = useState(false);
+            const [notSupported, setNotSupported] = useState(false);
+            const recognitionRef = useRef(null);
+            
+            useEffect(() => {
+                if (disabled && isListening) {
+                    if (recognitionRef.current) recognitionRef.current.stop();
+                    setIsListening(false);
+                }
+            }, [disabled, isListening]);
+
+            const toggleListen = () => {
+                if (disabled) return;
+                
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) {
+                    setNotSupported(true);
+                    return;
+                }
+                
+                if (isListening) {
+                    if (recognitionRef.current) {
+                        recognitionRef.current.stop();
+                    }
+                    setIsListening(false);
+                    return;
+                }
+                
+                const recognition = new SpeechRecognition();
+                recognition.lang = DICT_LANGS[lang] || 'en-GB';
+                recognition.continuous = true; 
+                recognition.interimResults = false;
+                
+                recognition.onstart = () => setIsListening(true);
+                
+                recognition.onresult = function(e) {
+                    const lastIdx = e.results.length - 1;
+                    const latestResult = e.results[lastIdx];
+                    if (latestResult.isFinal) {
+                        onDictation(latestResult[0].transcript);
+                    }
+                };
+                
+                recognition.onerror = function(e) {
+                    console.error("Speech recognition error:", e);
+                    setIsListening(false);
+                };
+                
+                recognition.onend = function() {
+                    setIsListening(false);
+                };
+                
+                recognitionRef.current = recognition;
+                recognition.start();
+            };
+            
+            return (
+                <div className="flex items-center gap-2">
+                    <button 
+                        type="button"
+                        onClick={toggleListen}
+                        disabled={disabled}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${isListening ? 'bg-red-100 text-red-600 border-red-300 animate-pulse shadow-inner' : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200 shadow-sm'} border disabled:opacity-50`}
+                    >
+                        {isListening ? (
+                            <><i className="ph-fill ph-stop-circle icon-md"></i> {ui.stopDict}</>
+                        ) : (
+                            <><i className="ph-fill ph-microphone icon-md"></i> {ui.startDict}</>
+                        )}
+                    </button>
+                    {notSupported && <span className="text-red-500 text-sm font-medium bg-red-50 px-2 py-1 rounded">{ui.notSupported}</span>}
+                </div>
+            );
+        }
+
+        // --- COMPONENT: Speak Question Button (Text-to-Speech) ---
+        function SpeakQuestionButton({ text, langCode, ui }) {
+            const [isSpeaking, setIsSpeaking] = useState(false);
+
+            useEffect(() => {
+                window.speechSynthesis.cancel();
+                setIsSpeaking(false);
+                return () => window.speechSynthesis.cancel();
+            }, [text]);
+
+            const toggleSpeak = () => {
+                if (isSpeaking) {
+                    window.speechSynthesis.cancel();
+                    setIsSpeaking(false);
+                } else {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = langCode;
+                    utterance.onend = () => setIsSpeaking(false);
+                    utterance.onerror = () => setIsSpeaking(false);
+                    window.speechSynthesis.speak(utterance);
+                    setIsSpeaking(true);
+                }
+            };
+
+            return (
+                <button
+                    onClick={toggleSpeak}
+                    title={isSpeaking ? ui.stopReading : ui.readAloud}
+                    className={`flex-shrink-0 p-2 rounded-full transition-colors flex items-center justify-center mt-1 ${isSpeaking ? 'bg-sky-200 text-sky-800 shadow-inner' : 'bg-sky-100 text-sky-700 hover:bg-sky-200 shadow-sm'}`}
+                >
+                    <i className={`ph-fill ${isSpeaking ? 'ph-stop-circle' : 'ph-speaker-high'} icon-md`}></i>
+                </button>
+            );
+        }
+
+        // --- COMPONENT: Synopsis Box ---
+        function SynopsisBox({ practical, lang, ui }) {
+            const [isOpen, setIsOpen] = useState(false);
+
+            return (
+                <div className="mb-8 bg-white border border-sky-200 rounded-xl shadow-sm overflow-hidden interactive-container">
+                    <button 
+                        onClick={() => setIsOpen(!isOpen)} 
+                        className="w-full flex items-center justify-between p-4 bg-sky-50 hover:bg-sky-100 transition-colors text-left"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="bg-sky-600 text-white w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm">
+                                <i className="ph-bold ph-info icon-sm"></i>
+                            </div>
+                            <span className="font-bold text-sky-900">{ui.tapToFindOut}</span>
+                        </div>
+                        <i className={`ph-bold ph-caret-down text-sky-600 icon-md transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}></i>
+                    </button>
+                    
+                    {isOpen && (
+                        <div className="p-5 border-t border-sky-100 bg-white animate-in slide-in-from-top-2">
+                            <div className="flex items-start gap-4">
+                                <div className="mt-1">
+                                    <SpeakQuestionButton text={practical.synopsis[lang]} langCode={DICT_LANGS[lang]} ui={ui} />
+                                </div>
+                                <div className="text-slate-700 leading-relaxed">
+                                    <p className="whitespace-pre-wrap">{practical.synopsis[lang]}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // --- COMPONENT: Individual Question Card ---
+        function QuestionCard({ eq, lang, ui, answer, setAnswer, feedback, setFeedback }) {
+            const [isMarking, setIsMarking] = useState(false);
+            const [showModels, setShowModels] = useState(false);
+
+            const appendDictation = (text) => {
+                setAnswer(prev => prev + (prev.length && !prev.endsWith(' ') ? ' ' : '') + text);
+            };
+
+            const handleSubmit = () => {
+                if (answer.trim().length < 2) return;
+                setIsMarking(true);
+                setFeedback(null);
+
+                setTimeout(() => {
+                    const result = eq.markFn(answer.toLowerCase());
+                    setFeedback(result);
+                    setIsMarking(false);
+                }, 600);
+            };
+
+            return (
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-8 print-break animate-in fade-in">
+                    
+                    {/* Header */}
+                    <div className="bg-sky-50 p-5 border-b border-sky-100 flex flex-col sm:flex-row justify-between items-start gap-4">
+                        <div className="flex items-start gap-3">
+                            <SpeakQuestionButton text={eq.q[lang]} langCode={DICT_LANGS[lang]} ui={ui} />
+                            <h3 className="text-lg font-bold text-slate-800 leading-relaxed mt-0.5">{eq.q[lang]}</h3>
+                        </div>
+                        <span className="bg-white px-3 py-1 rounded text-sm font-bold text-sky-800 border border-sky-200 shrink-0 mt-1 sm:mt-0">[{eq.maxMarks} Marks]</span>
+                    </div>
+                    
+                    {/* Interactive Body */}
+                    <div className="p-6 grid lg:grid-cols-2 gap-8 interactive-container">
+                        {/* Left: Input */}
+                        <div className="space-y-4">
+                            <textarea 
+                                value={answer}
+                                onChange={(e) => setAnswer(e.target.value)}
+                                placeholder={ui.typeHere} 
+                                className="w-full h-48 p-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 resize-none font-sans text-base" 
+                                disabled={isMarking} 
+                            />
+                            <div className="flex flex-col sm:flex-row gap-3 justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                    <DictationButton onDictation={appendDictation} lang={lang} ui={ui} disabled={isMarking} />
+                                </div>
+                                
+                                <div className="flex gap-2 flex-1 justify-end action-buttons">
+                                    <button 
+                                        onClick={() => setShowModels(!showModels)} 
+                                        className={`px-4 py-2 rounded-lg font-medium border flex items-center gap-2 ${showModels ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'}`}
+                                    >
+                                        {showModels ? ui.hideMod : ui.revealMod}
+                                    </button>
+                                    <button 
+                                        onClick={handleSubmit} 
+                                        disabled={isMarking || answer.trim().length === 0} 
+                                        className="px-6 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 font-medium disabled:opacity-50 flex items-center gap-2"
+                                    >
+                                        {isMarking ? <><i className="ph-bold ph-spinner animate-spin"></i> ...</> : ui.markAns}
+                                    </button>
+                                </div>
+                            </div>
+                            <p className="text-xs text-amber-600 font-medium italic text-right">{ui.dictCheck}</p>
+                        </div>
+
+                        {/* Right: Feedback */}
+                        <div className={`p-5 rounded-lg border flex flex-col justify-center items-center transition-colors duration-300 ${feedback ? 'bg-green-50/50 border-green-200' : 'bg-slate-50 border-slate-200 border-dashed text-slate-400'}`}>
+                            {!feedback && !isMarking && <p className="text-center px-4">{ui.submitMsg}</p>}
+                            {isMarking && <p className="text-center text-sky-500 animate-pulse"><i className="ph-bold ph-spinner animate-spin icon-xl mb-2 block mx-auto"></i>{ui.checkMsg}</p>}
+                            {feedback && (
+                                <div className="animate-in fade-in w-full">
+                                    <div className="flex justify-between items-center mb-4 border-b border-green-200 pb-2">
+                                        <h4 className="font-bold text-slate-800">{ui.autoFeed}</h4>
+                                        <span className="font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full text-lg">{feedback.marks} / {eq.maxMarks}</span>
+                                    </div>
+                                    <div className="space-y-4 text-sm">
+                                        <div>
+                                            <strong className="text-green-700 flex items-center gap-1 mb-2"><i className="ph-fill ph-check-circle icon-md"></i> {ui.didWell}</strong>
+                                            <ul className="list-disc pl-6 text-slate-700 space-y-1">
+                                                {feedback.positivePoints.length > 0 ? feedback.positivePoints.map((p, idx) => <li key={idx}>{p}</li>) : <li>Attempt submitted.</li>}
+                                            </ul>
+                                        </div>
+                                        {feedback.marks < eq.maxMarks && (
+                                            <div className="bg-amber-50 p-3 rounded-lg border border-amber-200">
+                                                <strong className="text-amber-800 flex items-center gap-1 mb-1"><i className="ph-fill ph-warning-circle icon-md"></i> {ui.toImprove}</strong>
+                                                <p className="text-amber-900">{feedback.improvement}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Model Answers Dropdown (Interactive View) */}
+                    {showModels && (
+                        <div className="bg-slate-50 p-6 border-t border-slate-200 animate-in slide-in-from-top-2 interactive-container">
+                            <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><i className="ph-bold ph-book-open text-sky-600 icon-lg"></i> Levelled Model Answers</h4>
+                            <div className="grid md:grid-cols-3 gap-4">
+                                <div className="p-4 bg-orange-50 border-l-4 border-orange-400 rounded-lg flex flex-col shadow-sm">
+                                    <span className="text-xs font-bold text-orange-800 uppercase tracking-wider block mb-2">{ui.lvl1}</span>
+                                    <p className="text-sm text-slate-700 italic flex-1">"{eq.models.level1}"</p>
+                                </div>
+                                <div className="p-4 bg-blue-50 border-l-4 border-blue-400 rounded-lg flex flex-col shadow-sm">
+                                    <span className="text-xs font-bold text-blue-800 uppercase tracking-wider block mb-2">{ui.lvl2}</span>
+                                    <p className="text-sm text-slate-700 italic flex-1">"{eq.models.level2}"</p>
+                                </div>
+                                <div className="p-4 bg-green-50 border-l-4 border-green-500 rounded-lg flex flex-col shadow-sm">
+                                    <span className="text-xs font-bold text-green-800 uppercase tracking-wider block mb-2">{ui.lvl3}</span>
+                                    <p className="text-sm text-slate-700 italic flex-1">"{eq.models.level3}"</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Print-Only View for this Question */}
+                    <div className="print-view-container text-black bg-white mt-4 hidden">
+                        <h3 className="font-semibold text-slate-600 text-sm uppercase mt-4">{ui.yourAns}</h3>
+                        <p className="whitespace-pre-wrap text-slate-800 text-base mt-2 p-4 bg-slate-50 border border-slate-200 rounded">{answer || ui.noAns}</p>
+                        
+                        {feedback ? (
+                            <div className="mt-4 border-l-4 border-sky-500 pl-4 py-2">
+                                <h3 className="font-bold text-lg text-slate-800 mb-2">{ui.autoFeed} ({feedback.marks} / {eq.maxMarks})</h3>
+                                <p className="text-sm font-semibold text-slate-600 uppercase mt-2 mb-1">{ui.didWell}</p>
+                                <ul className="list-disc pl-5 text-slate-800 text-sm mb-2">
+                                    {feedback.positivePoints.map((p, idx) => <li key={idx}>{p}</li>)}
+                                </ul>
+                                {feedback.marks < eq.maxMarks && (
+                                    <>
+                                        <p className="text-sm font-semibold text-slate-600 uppercase mt-3 mb-1">{ui.toImprove}</p>
+                                        <p className="text-base text-slate-800 bg-amber-50 p-3 border border-amber-200 rounded">{feedback.improvement}</p>
+                                    </>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="mt-4 text-slate-500 italic">
+                                {ui.notMarked}
+                            </div>
+                        )}
+
+                        <div className="mt-4">
+                            <h3 className="font-bold text-lg text-slate-800 mb-2">Model Answer ({ui.lvl3}):</h3>
+                            <p className="whitespace-pre-wrap text-slate-800 text-base p-4 bg-green-50 border border-green-200 rounded">{eq.models.level3}</p>
+                        </div>
+                    </div>
+
+                </div>
+            );
+        }
+
+        // --- COMPONENT: Booklet View ---
+        function BookletView({ lang, ui, setViewMode }) {
+            const handlePrint = () => window.print();
+
+            return (
+                <div className="animate-in fade-in bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden mb-8">
+                    <div className="bg-sky-700 p-6 flex justify-between items-center interactive-container">
+                        <button onClick={() => setViewMode('practicals')} className="px-4 py-2 bg-sky-800 text-white rounded-lg hover:bg-sky-900 font-medium flex items-center gap-2 transition-colors border border-sky-600">
+                            <i className="ph-bold ph-arrow-left icon-md"></i> {ui.backBtn}
+                        </button>
+                        <button onClick={handlePrint} className="px-6 py-2 bg-white text-sky-800 rounded-lg hover:bg-sky-50 font-bold flex items-center gap-2 transition-colors shadow-sm">
+                            <i className="ph-bold ph-printer icon-md"></i> {ui.printBooklet}
+                        </button>
+                    </div>
+
+                    <div className="p-8 sm:p-12 print-view-container block">
+                        <div className="text-center mb-12 border-b-2 border-sky-800 pb-8">
+                            <h1 className="text-4xl font-bold text-slate-900 mb-2">{ui.title}</h1>
+                            <h2 className="text-2xl text-sky-700 font-semibold">{ui.modelAnsTitle}</h2>
+                            <p className="mt-4 text-slate-500 text-lg">{ui.createdBy}</p>
+                        </div>
+
+                        <div className="space-y-12">
+                            {PRACTICALS.map((p, index) => (
+                                <div key={p.id} className={index > 0 ? "print-page-break mt-12 pt-8 border-t-4 border-slate-100" : ""}>
+                                    <h3 className="text-2xl font-bold text-sky-800 mb-6 flex items-center gap-3">
+                                        <i className={`ph-fill ${p.icon} text-3xl`}></i> {p.title[lang]}
+                                    </h3>
+                                    <div className="space-y-8">
+                                        {p.questions.map(q => (
+                                            <div key={q.id} className="print-avoid-break bg-slate-50 p-6 rounded-xl border border-slate-200">
+                                                <p className="font-bold text-slate-900 text-lg mb-4 flex items-start gap-2">
+                                                    <span className="shrink-0 text-sky-600">Q.</span> 
+                                                    <span>{q.q[lang]} <span className="text-sky-700 text-sm ml-1 font-semibold">[{q.maxMarks} Marks]</span></span>
+                                                </p>
+                                                <div className="pl-4 border-l-4 border-sky-500 bg-white p-4 rounded-r-lg shadow-sm">
+                                                    <p className="text-xs font-bold text-sky-700 uppercase tracking-wider mb-2">Model Answer ({ui.lvl3})</p>
+                                                    <p className="text-slate-800 whitespace-pre-wrap leading-relaxed">{q.models.level3}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // --- COMPONENT: Practical Tab Container ---
+        function PracticalTab({ practical, lang, ui }) {
+            const [answers, setAnswers] = useState({});
+            const [feedbacks, setFeedbacks] = useState({});
+
+            const handlePrint = () => {
+                window.print();
+            };
+
+            return (
+                <div>
+                    {/* Print Header (Only visible on print) */}
+                    <div className="print-view-container text-black bg-white mb-8 hidden">
+                        <div className="border-b-2 border-slate-800 pb-4">
+                            <h1 className="text-3xl font-bold text-slate-900">{ui.title}</h1>
+                            <p className="text-slate-600 text-lg">{ui.createdBy}</p>
+                            <h2 className="text-2xl font-bold text-sky-700 mt-4">{practical.title[lang]}</h2>
+                        </div>
+                    </div>
+
+                    {/* Synopsis Box added here */}
+                    <SynopsisBox practical={practical} lang={lang} ui={ui} />
+
+                    <div className="flex flex-col gap-2">
+                        {practical.questions.map(q => (
+                            <QuestionCard 
+                                key={q.id} 
+                                eq={q} 
+                                lang={lang} 
+                                ui={ui} 
+                                answer={answers[q.id] || ""}
+                                setAnswer={(val) => setAnswers(prev => ({...prev, [q.id]: typeof val === 'function' ? val(prev[q.id]||"") : val}))}
+                                feedback={feedbacks[q.id]}
+                                setFeedback={(val) => setFeedbacks(prev => ({...prev, [q.id]: val}))}
+                            />
+                        ))}
+                    </div>
+
+                    {/* Master Print Button */}
+                    <div className="interactive-container mt-8 flex justify-center pb-12">
+                        <button onClick={handlePrint} className="px-8 py-4 bg-white text-sky-700 border-2 border-sky-300 rounded-xl hover:bg-sky-50 font-bold flex items-center gap-3 cursor-pointer shadow-md text-lg transition-transform hover:scale-105">
+                            <i className="ph-bold ph-printer icon-lg"></i> {ui.printFeed}
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        // --- MAIN APP LAYOUT ---
+        function App() {
+          const [activePracticalId, setActivePracticalId] = useState(PRACTICALS[0].id); 
+          const [lang, setLang] = useState('en');
+          const [viewMode, setViewMode] = useState('practicals');
+
+          const handleTabSwitch = (id) => {
+              setActivePracticalId(id);
+          };
+
+          const activePractical = PRACTICALS.find(p => p.id === activePracticalId);
+          const ui = UI_TEXT[lang];
+
+          return (
+            <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans print:bg-white print:min-h-0">
+              <header className="bg-sky-700 text-white p-6 shadow-md interactive-container">
+                <div className="max-w-6xl mx-auto">
+                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                        <div className="overflow-hidden max-w-full flex items-center gap-4">
+                            <div className="bg-white/20 p-3 rounded-2xl shadow-inner hidden sm:flex transition-all duration-300">
+                                <i className={`ph-fill ${activePractical.icon} text-5xl text-white`}></i>
+                            </div>
+                            <div>
+                                <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2 whitespace-nowrap overflow-x-auto pb-1">
+                                    <i className={`ph-bold ${activePractical.icon} icon-xl shrink-0 sm:hidden`}></i>
+                                    {ui.title}
+                                </h1>
+                                <div className="text-sky-100 mt-2 flex flex-wrap items-center gap-2 sm:gap-3">
+                                    <span>{ui.subtitle}</span>
+                                    <span className="hidden sm:inline text-sky-300">•</span>
+                                    <span className="text-white font-medium bg-sky-600/50 px-2.5 py-1 rounded flex items-center gap-1.5 text-sm">
+                                        <i className="ph-fill ph-chalkboard-teacher"></i> {ui.createdBy}
+                                    </span>
+                                    <span className="hidden sm:inline text-sky-300">•</span>
+                                    <select 
+                                        value={lang} 
+                                        onChange={(e) => setLang(e.target.value)}
+                                        className="bg-sky-800 text-white font-semibold border border-sky-500 rounded-md px-2 py-1 text-sm outline-none hover:bg-sky-600 cursor-pointer shadow-sm transition-colors"
+                                    >
+                                        <option value="en">🇬🇧 English</option>
+                                        <option value="ro">🇷🇴 Română</option>
+                                        <option value="pl">🇵🇱 Polski</option>
+                                        <option value="uk">🇺🇦 Українська</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Booklet Button */}
+                        <div className="w-full lg:w-auto flex items-center lg:justify-end">
+                            <button onClick={() => setViewMode(viewMode === 'booklet' ? 'practicals' : 'booklet')} className="w-full lg:w-auto bg-white text-sky-800 font-bold px-5 py-2.5 rounded-xl shadow-md hover:bg-sky-50 transition-transform hover:scale-105 flex items-center justify-center gap-2 border-2 border-sky-100">
+                                <i className={`ph-bold ${viewMode === 'booklet' ? 'ph-arrow-left' : 'ph-book-open'} icon-md`}></i> 
+                                {viewMode === 'booklet' ? ui.backBtn : ui.bookletBtn}
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {/* Named Tabs Navigation */}
+                    {viewMode === 'practicals' && (
+                        <div className="mt-6 pt-5 border-t border-sky-600/50">
+                            <nav className="tab-navigation flex flex-wrap gap-2">
+                                {PRACTICALS.map(p => (
+                                    <button 
+                                        key={p.id}
+                                        onClick={() => handleTabSwitch(p.id)} 
+                                        className={`px-4 py-2.5 rounded-lg font-bold transition-all text-sm flex items-center gap-2 shadow-sm
+                                            ${activePracticalId === p.id ? 'bg-red-600 text-white scale-105 shadow-md ring-2 ring-red-400 ring-offset-2 ring-offset-sky-700' : 'bg-white text-slate-800 hover:bg-slate-100 border border-transparent hover:border-slate-300'}`}
+                                    >
+                                        <i className={`ph-bold ${p.icon} text-lg`}></i>
+                                        <span className="whitespace-nowrap">{p.title[lang]}</span>
+                                    </button>
+                                ))}
+                            </nav>
+                        </div>
+                    )}
+                </div>
+              </header>
+
+              <main className="flex-1 w-full max-w-5xl mx-auto p-4 py-10">
+                {viewMode === 'practicals' ? (
+                    <PracticalTab 
+                        key={activePracticalId} 
+                        practical={activePractical} 
+                        lang={lang} 
+                        ui={ui} 
+                    />
+                ) : (
+                    <BookletView lang={lang} ui={ui} setViewMode={setViewMode} />
+                )}
+              </main>
+
+              <footer className="interactive-container text-center p-6 text-slate-500 text-sm font-medium">
+                {ui.createdBy} for AQA GCSE Biology
+              </footer>
+            </div>
+          );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
